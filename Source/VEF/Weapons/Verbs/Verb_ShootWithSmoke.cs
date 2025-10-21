@@ -46,14 +46,18 @@ namespace VEF.Weapons
                 float relAngle = Quaternion.LookRotation(CurrentTarget.CenterVector3 - Caster.Position.ToVector3Shifted()).eulerAngles.y;
                 Vector3 origin = caster.PositionHeld.ToVector3Shifted();
                 Map map = caster.MapHeld;
-                if (moteProps.moteDef != null)
-                    SmokeMaker.ThrowMoteDef(moteProps.moteDef, origin, map, size, moteProps.Velocity, relAngle + moteProps.Angle, moteProps.Rotation);
-                if (moteProps.fleckDef != null)
-                    SmokeMaker.ThrowFleckDef(moteProps.fleckDef, origin, map, size, moteProps.Velocity, relAngle + moteProps.Angle, moteProps.Rotation);
+                ThrowEffect(moteProps.moteDef, size, relAngle, origin, map, moteProps);
+                ThrowEffect(moteProps.fleckDef, size, relAngle, origin, map, moteProps);
             }
 
             return true;
 
+        }
+
+        private static void ThrowEffect(Def effectDef, float size, float relAngle, Vector3 origin, Map map, MoteProperties moteProps)
+        {
+            if (effectDef != null)
+                SmokeMaker.ThrowDef(effectDef, origin, map, size, moteProps.Velocity, relAngle + moteProps.Angle, moteProps.Rotation);
         }
     }
 }
