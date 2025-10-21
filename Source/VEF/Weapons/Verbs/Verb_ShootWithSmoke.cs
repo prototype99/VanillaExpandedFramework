@@ -11,7 +11,7 @@ namespace VEF.Weapons
             if (base.TryCastShot())
             {
                 var projectile = this.GetProjectile();
-                var projectile2 = projectile.projectile;
+                var projectileProps = projectile?.projectile;
                 var equipmentDef = EquipmentSource?.def;
                 if (equipmentDef is null)
                 {
@@ -22,18 +22,35 @@ namespace VEF.Weapons
                 var moteProps = equipmentDef.GetModExtension<MoteProperties>();
                 if (moteProps is null)
                 {
-                    Log.ErrorOnce($"<color=teal>{GetType()}</color> cannot be used without <color=teal>MoteProperties</color> DefModExtension. Motes will not be thrown.", Gen.HashCombine(projectile.GetHashCode(), "MoteProperties".GetHashCode()));
+                    // Warn-once and proceed without throwing motes to avoid error spam
+                    Log.WarningOnce($"<color=teal>{GetType()}</color> cannot be used without <color=teal>MoteProperties</color> DefModExtension on {equipmentDef.defName}. Motes will not be thrown.", Gen.HashCombine(equipmentDef.defName.GetHashCode(), "MoteProperties".GetHashCode()));
                     return true;
                 }
 
-                var size = moteProps.Size(projectile2.GetDamageAmount(caster));
+                // Compute size safely; default to a small value if projectile props are missing
+                int damage = 0;
+                if (projectileProps != null)
+                {
+                    try
+                    {
+                        damage = projectileProps.GetDamageAmount(caster);
+                    }
+                    catch
+                    {
+                        damage = 0;
+                    }
+                }
+                var size = moteProps.Size(damage);
+
                 for (var i = 0; i < moteProps.numTimesThrown; i++)
                 {
                     var relAngle = Quaternion.LookRotation(CurrentTarget.CenterVector3 - Caster.Position.ToVector3Shifted()).eulerAngles.y;
+                    Vector3 origin = caster.PositionHeld.ToVector3Shifted();
+                    Map map = caster.MapHeld;
                     if (moteProps.moteDef != null)
-                        SmokeMaker.ThrowMoteDef(moteProps.moteDef, caster.PositionHeld.ToVector3Shifted(), caster.MapHeld, size, moteProps.Velocity, relAngle + moteProps.Angle, moteProps.Rotation);
+                        SmokeMaker.ThrowMoteDef(moteProps.moteDef, origin, map, size, moteProps.Velocity, relAngle + moteProps.Angle, moteProps.Rotation);
                     if (moteProps.fleckDef != null)
-                        SmokeMaker.ThrowFleckDef(moteProps.fleckDef, caster.PositionHeld.ToVector3Shifted(), caster.MapHeld, size, moteProps.Velocity, relAngle + moteProps.Angle, moteProps.Rotation);
+                        SmokeMaker.ThrowFleckDef(moteProps.fleckDef, origin, map, size, moteProps.Velocity, relAngle + moteProps.Angle, moteProps.Rotation);
                 }
 
                 return true;
