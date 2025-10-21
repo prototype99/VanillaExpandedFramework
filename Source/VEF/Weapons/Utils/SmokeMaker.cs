@@ -35,15 +35,13 @@ namespace VEF.Weapons
 
         public static void ThrowSmokeTrail(Vector3 loc, float size, Map map, string defName)
         {
-            if (GenView.ShouldSpawnMotesAt(loc, map) && !map.moteCounter.Saturated)
-            {
-                MoteThrown moteThrown = (MoteThrown)ThingMaker.MakeThing(ThingDef.Named(defName), null);
-                moteThrown.Scale = Rand.Range(2f, 3f) * size;
-                moteThrown.exactPosition = loc;
-                moteThrown.rotationRate = Rand.Range(-0.5f, 0.5f);
-                moteThrown.SetVelocity((float)Rand.Range(30, 40), Rand.Range(0.008f, 0.012f));
-                GenSpawn.Spawn(moteThrown, IntVec3Utility.ToIntVec3(loc), map, WipeMode.Vanish);
-            }
+            if (!GenView.ShouldSpawnMotesAt(loc, map) || map.moteCounter.Saturated) return;
+            MoteThrown moteThrown = (MoteThrown)ThingMaker.MakeThing(ThingDef.Named(defName));
+            moteThrown.Scale = Rand.Range(2f, 3f) * size;
+            moteThrown.exactPosition = loc;
+            moteThrown.rotationRate = Rand.Range(-0.5f, 0.5f);
+            moteThrown.SetVelocity(Rand.Range(30, 40), Rand.Range(0.008f, 0.012f));
+            GenSpawn.Spawn(moteThrown, IntVec3Utility.ToIntVec3(loc), map);
         }
 
         public static void ThrowFlintLockSmoke(Vector3 loc, Map map, float size)
@@ -52,12 +50,12 @@ namespace VEF.Weapons
             {
                 return;
             }
-            MoteThrown moteThrown = (MoteThrown)ThingMaker.MakeThing(InternalDefOf.VEF_FlintlockSmoke, null);
+            MoteThrown moteThrown = (MoteThrown)ThingMaker.MakeThing(InternalDefOf.VEF_FlintlockSmoke);
             moteThrown.Scale = Rand.Range(1.5f, 2.5f) * size;
             moteThrown.rotationRate = Rand.Range(-30f, 30f);
             moteThrown.exactPosition = loc;
-            moteThrown.SetVelocity((float)Rand.Range(30, 40), Rand.Range(0.5f, 0.7f));
-            GenSpawn.Spawn(moteThrown, IntVec3Utility.ToIntVec3(loc), map, WipeMode.Vanish);
+            moteThrown.SetVelocity(Rand.Range(30, 40), Rand.Range(0.5f, 0.7f));
+            GenSpawn.Spawn(moteThrown, IntVec3Utility.ToIntVec3(loc), map);
         }
     }
 }
