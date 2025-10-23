@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 using Verse;
 
@@ -29,14 +29,20 @@ namespace VEF.Weapons
             for (int i = 0; i < moteProps.numTimesThrown; i++)
             {
                 float relAngle = Quaternion.LookRotation(CurrentTarget.CenterVector3 - Caster.Position.ToVector3Shifted()).eulerAngles.y;
-                if (moteProps.moteDef != null)
-                    SmokeMaker.ThrowMoteDef(moteProps.moteDef, caster.PositionHeld.ToVector3Shifted(), caster.MapHeld, size, moteProps.Velocity, relAngle + moteProps.Angle, moteProps.Rotation);
-                if (moteProps.fleckDef != null)
-                    SmokeMaker.ThrowFleckDef(moteProps.fleckDef, caster.PositionHeld.ToVector3Shifted(), caster.MapHeld, size, moteProps.Velocity, relAngle + moteProps.Angle, moteProps.Rotation);
+                Vector3 origin = caster.PositionHeld.ToVector3Shifted();
+                Map map = caster.MapHeld;
+                ThrowEffect(moteProps.moteDef, size, relAngle, origin, map, moteProps);
+                ThrowEffect(moteProps.fleckDef, size, relAngle, origin, map, moteProps);
             }
 
             return true;
 
+        }
+
+        private static void ThrowEffect(Def effectDef, float size, float relAngle, Vector3 origin, Map map, MoteProperties moteProps)
+        {
+            if (effectDef != null)
+                SmokeMaker.ThrowDef(effectDef, origin, map, size, moteProps.Velocity, relAngle + moteProps.Angle, moteProps.Rotation);
         }
     }
 }
