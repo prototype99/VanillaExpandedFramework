@@ -10,7 +10,6 @@ namespace VEF.Weapons
         {
             if (!base.TryCastShot()) return false;
             ThingDef projectile = this.GetProjectile();
-            ProjectileProperties projectile2 = projectile.projectile;
             ThingDef equipmentDef = EquipmentSource?.def;
             if (equipmentDef is null)
             {
@@ -25,24 +24,34 @@ namespace VEF.Weapons
                 return true;
             }
 
-            float size = moteProps.Size(projectile2.GetDamageAmount(caster));
             for (int i = 0; i < moteProps.numTimesThrown; i++)
             {
-                float relAngle = Quaternion.LookRotation(CurrentTarget.CenterVector3 - Caster.Position.ToVector3Shifted()).eulerAngles.y;
-                Vector3 origin = caster.PositionHeld.ToVector3Shifted();
-                Map map = caster.MapHeld;
-                ThrowEffect(moteProps.moteDef, size, relAngle, origin, map, moteProps);
-                ThrowEffect(moteProps.fleckDef, size, relAngle, origin, map, moteProps);
+                ThrowEffect(moteProps.moteDef, projectile, moteProps);
+                ThrowEffect(moteProps.fleckDef, projectile, moteProps);
             }
 
             return true;
 
         }
 
-        private static void ThrowEffect(Def effectDef, float size, float relAngle, Vector3 origin, Map map, MoteProperties moteProps)
+        private void ThrowEffect(Def effectDef, ThingDef projectile, MoteProperties moteProps)
         {
             if (effectDef != null)
-                SmokeMaker.ThrowDef(effectDef, origin, map, size, moteProps.Velocity, relAngle + moteProps.Angle, moteProps.Rotation);
+            {
+                SmokeMaker.ThrowDef(
+                    effectDef,
+                    // origin
+                    caster.PositionHeld.ToVector3Shifted(),
+                    // map
+                    caster.MapHeld,
+                    // size
+                    moteProps.Size(projectile.projectile.GetDamageAmount(caster)),
+                    moteProps.Velocity,
+                    // relangle
+                    Quaternion.LookRotation(CurrentTarget.CenterVector3 - Caster.Position.ToVector3Shifted()).eulerAngles.y + moteProps.Angle,
+                    moteProps.Rotation
+                    );
+            }
         }
     }
 }
